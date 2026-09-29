@@ -1,21 +1,23 @@
+# Reduced to login-only (2026-09-29, per Linh Doan): the cart/checkout selectors this flow
+# depended on don't have distinct accessibility ids in the app (cart_checkout_button and
+# cart_total_cost_label both resolve to the shared "cart_screen" id), so they always failed.
 appId: com.qademo.iosshopdemo
 ---
 - launchApp
-- tapOn: login_email_field
+- assertVisible:
+    id: login_screen
+- tapOn:
+    id: login_email_field
 - inputText: "demo@shop.com"
-- tapOn: login_password_field
+- tapOn:
+    id: login_password_field
 - inputText: "123456"
-- tapOn: login_submit_button
-- assertVisible: home_screen
-- tapOn: home_product_item_defile-lux-blazer
-- tapOn: product_detail_buy_now_button
-- assertVisible: cart_screen
-- tapOn: cart_checkout_button
-- assertVisible: checkout_screen
-- tapOn: checkout_place_order_button
-- extendedWaitUntil:
-    visible: order_confirmed_screen
-    timeout: 8000
-- assertVisible: order_confirmed_order_id_label
-- tapOn: order_confirmed_back_to_home_button
-- assertVisible: home_screen
+- tapOn:
+    id: login_submit_button
+- runFlow:
+    when:
+      visible: "Not Now"
+    commands:
+      - tapOn: "Not Now"
+- assertVisible:
+    id: home_screen

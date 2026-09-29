@@ -1,10 +1,20 @@
 appId: com.qademo.iosshopdemo
 ---
 - launchApp
-- assertVisible: login_screen
-- tapOn: login_email_field
+- assertVisible:
+    id: login_screen
+- tapOn:
+    id: login_email_field
 - inputText: "demo@shop.com"
-- tapOn: login_password_field
+- tapOn:
+    id: login_password_field
 - inputText: "123456"
-- tapOn: login_submit_button
-- assertVisible: home_screen
+- tapOn:
+    id: login_submit_button
+- runFlow:
+    when:
+      visible: "Not Now"
+    commands:
+      - tapOn: "Not Now"
+- assertVisible:
+    id: home_screen
