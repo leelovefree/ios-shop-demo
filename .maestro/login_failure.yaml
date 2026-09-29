@@ -1,0 +1,11 @@
+appId: com.qademo.iosshopdemo
+---
+- launchApp
+- assertVisible: login_screen
+- tapOn: login_email_field
+- inputText: "wrong@shop.com"
+- tapOn: login_password_field
+- inputText: "wrongpass"
+- tapOn: login_submit_button
+- assertVisible: login_error_message
+- assertNotVisible: home_screen

@@ -1,0 +1,21 @@
+appId: com.qademo.iosshopdemo
+---
+- launchApp
+- tapOn: login_email_field
+- inputText: "demo@shop.com"
+- tapOn: login_password_field
+- inputText: "123456"
+- tapOn: login_submit_button
+- assertVisible: home_screen
+- tapOn: home_product_item_defile-lux-blazer
+- tapOn: product_detail_buy_now_button
+- assertVisible: cart_screen
+- tapOn: cart_checkout_button
+- assertVisible: checkout_screen
+- tapOn: checkout_place_order_button
+- extendedWaitUntil:
+    visible: order_confirmed_screen
+    timeout: 8000
+- assertVisible: order_confirmed_order_id_label
+- tapOn: order_confirmed_back_to_home_button
+- assertVisible: home_screen

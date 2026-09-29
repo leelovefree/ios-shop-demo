@@ -1,0 +1,18 @@
+appId: com.qademo.iosshopdemo
+---
+- launchApp
+- tapOn: login_email_field
+- inputText: "demo@shop.com"
+- tapOn: login_password_field
+- inputText: "123456"
+- tapOn: login_submit_button
+- assertVisible: home_screen
+- tapOn: home_product_item_defile-lux-blazer
+- assertVisible: product_detail_screen
+- tapOn: product_detail_size_option_m
+- tapOn: product_detail_color_option_pink
+- tapOn: product_detail_quantity_increment_button
+- tapOn: product_detail_buy_now_button
+- assertVisible: cart_screen
+- assertVisible: cart_item_row_defile-lux-blazer-m-pink
+- assertVisible: cart_total_cost_label
