@@ -52,7 +52,10 @@ jobs:
 
       - name: Run pipeline-managed tests (qa-tests/)
         run: |
-          mapfile -t flows < <(find qa-tests -name '*.yaml')
+          flows=()
+          while IFS= read -r f; do
+            flows+=("$f")
+          done < <(find qa-tests -name '*.yaml')
           if [ "${#flows[@]}" -gt 0 ]; then
             maestro test "${flows[@]}"
           else
