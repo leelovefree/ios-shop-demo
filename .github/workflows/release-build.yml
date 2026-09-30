@@ -1,0 +1,60 @@
+name: Release build
+
+# Builds a simulator ShopDemo.app.zip, publishes it as a GitHub Release, and notifies the QA repo
+# (leelovefree/qa-pipeline) so it tests exactly this build. QA owns all testing; this repo only ships builds.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'Sources/**'
+      - 'project.yml'
+      - '.github/workflows/release-build.yml'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write   # create the release
+
+jobs:
+  build:
+    runs-on: macos-15
+    timeout-minutes: 30
+    env:
+      TAG: build-${{ github.run_number }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select an available Xcode
+        run: |
+          sudo xcode-select -s "$(ls -d /Applications/Xcode*.app | sort -V | tail -1)"
+          xcodebuild -version
+
+      - name: Build simulator app
+        run: |
+          brew install xcodegen
+          xcodegen generate
+          xcodebuild -project ShopDemo.xcodeproj -scheme ShopDemo -sdk iphonesimulator \
+            -configuration Release -derivedDataPath build build
+          APP=$(find build/Build/Products/Release-iphonesimulator -maxdepth 1 -name '*.app' | head -1)
+          ditto -c -k --keepParent "$APP" ShopDemo.app.zip
+
+      - name: Publish release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$TAG" ShopDemo.app.zip --target "$GITHUB_SHA" --latest \
+            --title "ShopDemo $TAG" \
+            --notes "Simulator build of ${GITHUB_SHA::7} (iOS Simulator .app, zipped). For QA automation."
+
+      - name: Notify QA repo
+        env:
+          GH_TOKEN: ${{ secrets.QA_DISPATCH_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "QA_DISPATCH_TOKEN not set — skipping notification (QA will still test it nightly as 'latest')."
+            exit 0
+          fi
+          gh api repos/leelovefree/qa-pipeline/dispatches \
+            -f event_type=shopdemo-build \
+            -f "client_payload[build]=gh-release:${GITHUB_REPOSITORY}@${TAG}/ShopDemo.app.zip"
+          echo "Notified qa-pipeline: build $TAG"
