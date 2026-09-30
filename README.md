@@ -66,6 +66,10 @@ maestro test .maestro/checkout_happy_path.yaml
 maestro test .maestro/
 ```
 
+## Builds for QA
+
+QA automation lives in the QA repo ([qa-pipeline](https://github.com/leelovefree/qa-pipeline), `apps/shopdemo/`). Every app change to `main` publishes a simulator `ShopDemo.app.zip` as a GitHub Release via `.github/workflows/release-build.yml`. How to build and hand over builds: [dev guide](https://github.com/leelovefree/qa-pipeline/blob/main/docs/huong-dan-dev-ios.md).
+
 ## Known limitations
 
 - No persistence — session and cart always reset on relaunch.
