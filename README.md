@@ -70,6 +70,9 @@ maestro test .maestro/
 
 - **Search & sort** (Home): `home_search_field` filters by product name (case-insensitive, combines with the category chips); `home_sort_button` opens a menu with `home_sort_option_<default|price-asc|price-desc|name-asc>`. No match shows `home_empty_state_label`.
 - **Favorites**: heart on each Home card (`home_product_favorite_button_<productId>`) and on Product Detail (`product_detail_favorite_button`) share one state. `home_favorites_button` opens the Favorites screen (`favorites_screen`) listing `favorites_item_<productId>` with `favorites_remove_button_<productId>`; empty list shows `favorites_empty_state_label`.
+## Builds for QA
+
+QA automation lives in the QA repo ([qa-pipeline](https://github.com/leelovefree/qa-pipeline), `apps/shopdemo/`). Every app change to `main` publishes a simulator `ShopDemo.app.zip` as a GitHub Release via `.github/workflows/release-build.yml`. How to build and hand over builds: [dev guide](https://github.com/leelovefree/qa-pipeline/blob/main/docs/huong-dan-dev-ios.md).
 
 ## Known limitations
 
