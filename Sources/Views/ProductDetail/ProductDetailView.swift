@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ProductDetailView: View {
     @Environment(CartStore.self) private var cartStore
+    @Environment(FavoritesStore.self) private var favoritesStore
     @Environment(\.dismiss) private var dismiss
     let product: Product
     @Binding var path: NavigationPath
@@ -9,7 +10,6 @@ struct ProductDetailView: View {
     @State private var selectedSize: String
     @State private var selectedColor: ProductColorOption
     @State private var quantity: Int = 1
-    @State private var isFavorite = false
     @State private var showAddedConfirmation = false
 
     init(product: Product, path: Binding<NavigationPath>) {
@@ -43,9 +43,9 @@ struct ProductDetailView: View {
                     Spacer()
 
                     Button {
-                        isFavorite.toggle()
+                        favoritesStore.toggle(product)
                     } label: {
-                        Image(systemName: isFavorite ? "heart.fill" : "heart")
+                        Image(systemName: favoritesStore.isFavorite(product) ? "heart.fill" : "heart")
                             .foregroundStyle(.red)
                             .frame(width: 36, height: 36)
                             .background(Color.brandCardBackground)

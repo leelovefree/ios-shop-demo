@@ -21,6 +21,7 @@ enum ProductSortOption: String, CaseIterable, Identifiable {
 struct HomeView: View {
     @Environment(CartStore.self) private var cartStore
     @Environment(AuthStore.self) private var authStore
+    @Environment(FavoritesStore.self) private var favoritesStore
     @Binding var path: NavigationPath
     @State private var selectedCategory: String?
     @State private var searchText = ""
@@ -69,6 +70,17 @@ struct HomeView: View {
                             .clipShape(Circle())
                     }
                     .accessibilityIdentifier("home_logout_button")
+
+                    Button {
+                        path.append(Route.favorites)
+                    } label: {
+                        Image(systemName: "heart.fill")
+                            .foregroundStyle(.red)
+                            .frame(width: 40, height: 40)
+                            .background(Color.brandCardBackground)
+                            .clipShape(Circle())
+                    }
+                    .accessibilityIdentifier("home_favorites_button")
 
                     Button {
                         path.append(Route.cart)
@@ -148,12 +160,26 @@ struct HomeView: View {
 
                 LazyVGrid(columns: columns, spacing: 14) {
                     ForEach(filteredProducts) { product in
-                        Button {
-                            path.append(Route.productDetail(product))
-                        } label: {
-                            ProductGridItemView(product: product)
+                        ZStack(alignment: .topTrailing) {
+                            Button {
+                                path.append(Route.productDetail(product))
+                            } label: {
+                                ProductGridItemView(product: product)
+                            }
+                            .buttonStyle(.plain)
+
+                            Button {
+                                favoritesStore.toggle(product)
+                            } label: {
+                                Image(systemName: favoritesStore.isFavorite(product) ? "heart.fill" : "heart")
+                                    .foregroundStyle(.red)
+                                    .frame(width: 32, height: 32)
+                                    .background(Color.white.opacity(0.9))
+                                    .clipShape(Circle())
+                            }
+                            .padding(16)
+                            .accessibilityIdentifier("home_product_favorite_button_\(product.id)")
                         }
-                        .buttonStyle(.plain)
                     }
                 }
                 .padding(.horizontal, AppMetrics.paddingStandard)

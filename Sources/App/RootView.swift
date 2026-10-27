@@ -24,6 +24,8 @@ struct RootView: View {
             ProductDetailView(product: product, path: $path)
         case .cart:
             CartView(path: $path)
+        case .favorites:
+            FavoritesView(path: $path)
         case .checkout:
             CheckoutView(path: $path)
         case .orderConfirmed(let orderId):
