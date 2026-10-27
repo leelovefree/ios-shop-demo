@@ -41,8 +41,8 @@ Sources/
 ├── App/            # @main entry point, root navigation switch
 ├── DesignSystem/    # colors, fonts, metrics, shared button/card styles
 ├── Models/          # Product, CartItem, Route
-├── Stores/          # AuthStore, CartStore (@Observable), ProductCatalog (mock data)
-├── Views/           # Login, Home, ProductDetail, Cart, Checkout, OrderConfirmation, Shared
+├── Stores/          # AuthStore, CartStore, FavoritesStore (@Observable), ProductCatalog (mock data)
+├── Views/           # Login, Home, ProductDetail, Favorites, Cart, Checkout, OrderConfirmation, Shared
 └── Resources/        # Assets.xcassets
 Tests/ShopDemoTests/  # cart logic smoke tests (Swift Testing)
 .maestro/             # ready-to-run Maestro flows
@@ -66,12 +66,16 @@ maestro test .maestro/checkout_happy_path.yaml
 maestro test .maestro/
 ```
 
+## Home search, sort and favorites
+
+- **Search & sort** (Home): `home_search_field` filters by product name (case-insensitive, combines with the category chips); `home_sort_button` opens a menu with `home_sort_option_<default|price-asc|price-desc|name-asc>`. No match shows `home_empty_state_label`.
+- **Favorites**: heart on each Home card (`home_product_favorite_button_<productId>`) and on Product Detail (`product_detail_favorite_button`) share one state. `home_favorites_button` opens the Favorites screen (`favorites_screen`) listing `favorites_item_<productId>` with `favorites_remove_button_<productId>`; empty list shows `favorites_empty_state_label`.
 ## Builds for QA
 
 QA automation lives in the QA repo ([qa-pipeline](https://github.com/leelovefree/qa-pipeline), `apps/shopdemo/`). Every app change to `main` publishes a simulator `ShopDemo.app.zip` as a GitHub Release via `.github/workflows/release-build.yml`. How to build and hand over builds: [dev guide](https://github.com/leelovefree/qa-pipeline/blob/main/docs/huong-dan-dev-ios.md).
 
 ## Known limitations
 
-- No persistence — session and cart always reset on relaunch.
+- No persistence — session, cart and favorites always reset on relaunch.
 - Checkout is fully simulated: a ~1.5s delay generates a fake order ID, no real payment.
 - Product photos are SF Symbol placeholders on tinted backgrounds, not real images.

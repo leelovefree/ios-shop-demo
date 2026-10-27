@@ -1,16 +1,50 @@
 import SwiftUI
 
+enum ProductSortOption: String, CaseIterable, Identifiable {
+    case standard = "default"
+    case priceAscending = "price-asc"
+    case priceDescending = "price-desc"
+    case nameAscending = "name-asc"
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .standard: "Default"
+        case .priceAscending: "Price: Low to High"
+        case .priceDescending: "Price: High to Low"
+        case .nameAscending: "Name: A-Z"
+        }
+    }
+}
+
 struct HomeView: View {
     @Environment(CartStore.self) private var cartStore
     @Environment(AuthStore.self) private var authStore
+    @Environment(FavoritesStore.self) private var favoritesStore
     @Binding var path: NavigationPath
     @State private var selectedCategory: String?
+    @State private var searchText = ""
+    @State private var sortOption: ProductSortOption = .standard
 
     private let columns = [GridItem(.flexible(), spacing: 14), GridItem(.flexible(), spacing: 14)]
 
     private var filteredProducts: [Product] {
-        guard let selectedCategory else { return ProductCatalog.all }
-        return ProductCatalog.all.filter { $0.category == selectedCategory }
+        var products = ProductCatalog.all
+        if let selectedCategory {
+            products = products.filter { $0.category == selectedCategory }
+        }
+        let query = searchText.trimmingCharacters(in: .whitespaces)
+        if !query.isEmpty {
+            products = products.filter { $0.name.localizedCaseInsensitiveContains(query) }
+        }
+        switch sortOption {
+        case .standard: break
+        case .priceAscending: products.sort { $0.price < $1.price }
+        case .priceDescending: products.sort { $0.price > $1.price }
+        case .nameAscending: products.sort { $0.name < $1.name }
+        }
+        return products
     }
 
     var body: some View {
@@ -38,6 +72,17 @@ struct HomeView: View {
                     .accessibilityIdentifier("home_logout_button")
 
                     Button {
+                        path.append(Route.favorites)
+                    } label: {
+                        Image(systemName: "heart.fill")
+                            .foregroundStyle(.red)
+                            .frame(width: 40, height: 40)
+                            .background(Color.brandCardBackground)
+                            .clipShape(Circle())
+                    }
+                    .accessibilityIdentifier("home_favorites_button")
+
+                    Button {
                         path.append(Route.cart)
                     } label: {
                         ZStack(alignment: .topTrailing) {
@@ -63,16 +108,78 @@ struct HomeView: View {
                 }
                 .padding(.horizontal, AppMetrics.paddingStandard)
 
+                HStack(spacing: 10) {
+                    HStack(spacing: 8) {
+                        Image(systemName: "magnifyingglass")
+                            .foregroundStyle(Color.brandTextSecondary)
+                        TextField("Search products", text: $searchText)
+                            .font(AppFont.body)
+                            .textInputAutocapitalization(.never)
+                            .autocorrectionDisabled()
+                            .accessibilityIdentifier("home_search_field")
+                    }
+                    .padding(.horizontal, 12)
+                    .frame(height: 40)
+                    .background(Color.brandCardBackground)
+                    .clipShape(Capsule())
+
+                    Menu {
+                        ForEach(ProductSortOption.allCases) { option in
+                            Button {
+                                sortOption = option
+                            } label: {
+                                if option == sortOption {
+                                    Label(option.title, systemImage: "checkmark")
+                                } else {
+                                    Text(option.title)
+                                }
+                            }
+                            .accessibilityIdentifier("home_sort_option_\(option.rawValue)")
+                        }
+                    } label: {
+                        Image(systemName: "arrow.up.arrow.down")
+                            .foregroundStyle(Color.brandTextPrimary)
+                            .frame(width: 40, height: 40)
+                            .background(Color.brandCardBackground)
+                            .clipShape(Circle())
+                    }
+                    .accessibilityIdentifier("home_sort_button")
+                }
+                .padding(.horizontal, AppMetrics.paddingStandard)
+
                 CategoryFilterBar(categories: ProductCatalog.categories, selectedCategory: $selectedCategory)
+
+                if filteredProducts.isEmpty {
+                    Text("No products found")
+                        .font(AppFont.body)
+                        .foregroundStyle(Color.brandTextSecondary)
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 40)
+                        .accessibilityIdentifier("home_empty_state_label")
+                }
 
                 LazyVGrid(columns: columns, spacing: 14) {
                     ForEach(filteredProducts) { product in
-                        Button {
-                            path.append(Route.productDetail(product))
-                        } label: {
-                            ProductGridItemView(product: product)
+                        ZStack(alignment: .topTrailing) {
+                            Button {
+                                path.append(Route.productDetail(product))
+                            } label: {
+                                ProductGridItemView(product: product)
+                            }
+                            .buttonStyle(.plain)
+
+                            Button {
+                                favoritesStore.toggle(product)
+                            } label: {
+                                Image(systemName: favoritesStore.isFavorite(product) ? "heart.fill" : "heart")
+                                    .foregroundStyle(.red)
+                                    .frame(width: 32, height: 32)
+                                    .background(Color.white.opacity(0.9))
+                                    .clipShape(Circle())
+                            }
+                            .padding(16)
+                            .accessibilityIdentifier("home_product_favorite_button_\(product.id)")
                         }
-                        .buttonStyle(.plain)
                     }
                 }
                 .padding(.horizontal, AppMetrics.paddingStandard)
