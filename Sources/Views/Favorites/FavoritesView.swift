@@ -93,6 +93,7 @@ struct FavoritesView: View {
         }
         .background(Color.white)
         .navigationBarHidden(true)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("favorites_screen")
     }
 }
